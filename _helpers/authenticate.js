@@ -2,14 +2,15 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const User = require('./tables/user.schema')
 const config = require('../config/config')
+const ApiError = require('./api-errors')
 
 
 
 const generateToken = (user) => {
     return jwt.sign(
-        { id: user.id, email: user.email },
+        { id: user.id },
         config.app.secret,
-        { expiresIn: '24h' }
+        { expiresIn: '5m' }
     );
 };
 
@@ -24,20 +25,21 @@ const verifyToken = (token) => {
 const authMiddleware = async (req, res, next) => {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {
-        return res.status(401).json({ error: 'Требуется авторизация' });
+        throw ApiError.BadRequest(`Требуется авторизация`);
     }
     const decoded = verifyToken(token);
     if (!decoded) {
-        return res.status(401).json({ error: 'Неверный токен' });
+        throw ApiError.BadRequest(`Неверный токен`);
     }
     const user = await User.findByPk(decoded.id);
     if (!user) {
-        return res.status(401).json({ error: 'Пользователь не найден в middleware' });
+        throw ApiError.NotFound(`Пользователь при авторизации не найден`);
     }
 
     req.user = user;
     next();
 };
+
 
 const generateRefreshToken = (user) => {
     return jwt.sign(
@@ -55,10 +57,34 @@ const verifyRefreshToken = (token) => {
     }
 };
 
+const authRefreshMiddleware = async (req, res, next) => {
+    console.log(req.cookies);
+
+    const refreshToken = req.cookies.refreshToken; // Получаем из кук
+
+    if (!refreshToken) {
+        throw ApiError.BadRequest(`Требуется refresh-токен`);
+    }
+
+    const decoded = verifyRefreshToken(refreshToken);
+    if (!decoded) {
+        throw ApiError.BadRequest(`Неверный refresh-токен`);
+    }
+
+    const user = await User.findByPk(decoded.id);
+    if (!user) {
+        throw ApiError.NotFound(`Пользователь при авторизации не найден`);
+    }
+
+    req.user = user;
+    next();
+}
+
 module.exports = {
     generateToken,
     verifyToken,
     authMiddleware,
     generateRefreshToken,
-    verifyRefreshToken
+    verifyRefreshToken,
+    authRefreshMiddleware
 };
