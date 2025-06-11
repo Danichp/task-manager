@@ -6,11 +6,11 @@ module.exports = {
     await queryInterface.addColumn('users', 'role', {
       type: Sequelize.ENUM('Admin', 'User'),
       allowNull: false,
-      defaultValue: 'User'
+      defaultValue: 'User',
     });
   },
 
   async down(queryInterface, Sequelize) {
     await queryInterface.removeColumn('users', 'role');
-  }
+  },
 };
