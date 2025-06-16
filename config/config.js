@@ -14,11 +14,11 @@ const config = {
     logging: false,
   },
   email: {
-    host: process.env.EMAIL_HOST || 'smtp.yandex.ru',
-    port: parseInt(process.env.EMAIL_PORT) || 465,
-    user: process.env.EMAIL_USER || 'danichp01@yandex.ru',
-    pass: process.env.EMAIL_PASS || 'uzuxegjupluqinbf',
-    from_whom: process.env.EMAIL_FROM_WHOM || 'danichp01@yandex.ru',
+    host: process.env.EMAIL_HOST,
+    port: parseInt(process.env.EMAIL_PORT),
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+    from_whom: process.env.EMAIL_FROM_WHOM,
   },
 };
 
