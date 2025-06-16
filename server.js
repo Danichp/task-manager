@@ -1,7 +1,7 @@
 const express = require('express');
 require('dotenv').config();
 const cookieParser = require('cookie-parser');
-const errorMiddleware = require('./_helpers/error-handler');
+const errorHandler = require('./_helpers/error-handler');
 const cors = require('cors');
 
 const app = express();
@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(cors());
 app.use(`/api`, require('./api/api.controller'));
-app.use(errorMiddleware);
+app.use(errorHandler);
 
 app.get('/', (req, res) => {
   res.send('Task Manager API работает!');

@@ -13,7 +13,6 @@ class TaskService {
         dueDate,
         userId,
       });
-      console.log('test');
       res.status(201).json(task);
     } catch (err) {
       next(err);
