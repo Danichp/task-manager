@@ -54,9 +54,10 @@ class TaskService {
 
   async deleteTask(req, res, next) {
     try {
+      const user = req.user;
       const task = await Task.findByPk(req.params.id);
       if (!task) throw ApiError.NotFound(`Задача не найдена`);
-
+      if (user.id !== task.userId) throw ApiError.Forbidden();
       await task.destroy();
       res.json({ message: 'Задача удалена' });
     } catch (err) {

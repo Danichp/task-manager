@@ -1,5 +1,7 @@
 const nodemailer = require('nodemailer');
 const config = require('../../config/config');
+const ApiError = require('../../_helpers/api-errors');
+const { validationResult } = require(`express-validator`);
 
 class EmailService {
   constructor() {
@@ -17,11 +19,15 @@ class EmailService {
   }
 
   sendEmail = async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return next(ApiError.BadRequest(`Ошибка валидации`, errors.errors));
+    }
     const { to, text } = req.body;
 
     try {
       await this.transporter.sendMail({
-        from: '"Ваше Имя" <danichp01@yandex.ru>',
+        from: `"Task manager" <${config.email.user}>`,
         to,
         subject: 'Письмо с нашего сервера',
         text: '',

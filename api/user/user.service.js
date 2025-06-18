@@ -1,7 +1,4 @@
-const {
-  generateToken,
-  generateRefreshToken,
-} = require('../../_helpers/authenticate');
+const { generateToken, generateRefreshToken } = require('../../_helpers/authenticate');
 const User = require('../../_helpers/tables/user.schema');
 const Task = require('../../_helpers/tables/task.schema');
 const ApiError = require('../../_helpers/api-errors');
@@ -32,7 +29,7 @@ class UserService {
 
       res.json({
         token,
-        expiresIn: '24h',
+        expiresIn: '5m',
       });
     } catch (err) {
       next(err);
@@ -51,9 +48,7 @@ class UserService {
       }
       const existingUser = await User.findOne({ where: { email } });
       if (existingUser) {
-        throw ApiError.BadRequest(
-          `Пользователь с таким email:${email} уже существует`
-        );
+        throw ApiError.BadRequest(`Пользователь с таким email:${email} уже существует`);
       }
       const hashedPassword = await bcrypt.hash(password, 8);
       const user = await User.create({ name, email, password: hashedPassword });
@@ -67,7 +62,6 @@ class UserService {
     try {
       const user = await User.findByPk(req.params.id);
       if (!user) throw ApiError.NotFound(`Пользователь не найден`);
-
       // Удаляем все задачи пользователя
       await Task.destroy({
         where: { userId: req.params.id },
@@ -127,6 +121,10 @@ class UserService {
       }
       const user = req.user;
       let { name, email, password } = req.body;
+      const existingUser = await User.findOne({ where: { email } });
+      if (existingUser) {
+        throw ApiError.BadRequest(`Пользователь с таким email:${email} уже существует`);
+      }
       if (password) {
         password = await bcrypt.hash(password, 8);
       }
